@@ -1,321 +1,104 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>นักล่าแม่สะกด Motion</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Thai Motion Learning</title>
 
-<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js"></script>
 
-<style>
-*{box-sizing:border-box;margin:0;padding:0;font-family:'Sarabun','TH Sarabun New',sans-serif}
-body{min-height:100vh;background:linear-gradient(135deg,#1cc8ff,#38ef7d);padding:25px;color:white}
-.page{display:none}.page.active{display:block}
-.card{max-width:950px;margin:80px auto;background:rgba(255,255,255,.25);backdrop-filter:blur(18px);border-radius:28px;padding:35px;text-align:center}
-h1{font-size:56px} h2{font-size:40px} p{font-size:28px;margin:10px}
-input{width:100%;font-size:30px;padding:18px;border-radius:18px;border:0;margin:25px 0}
-.student{background:white;color:#222;font-size:28px;padding:16px;border-radius:18px;margin:10px;cursor:pointer}
-button{font-size:32px;padding:16px 45px;border:0;border-radius:20px;background:#ffb703;color:white;margin-top:25px;cursor:pointer}
-.hud{display:flex;justify-content:space-between;font-size:34px;font-weight:bold;margin-bottom:15px}
-.camera-wrap{position:relative;width:100%;height:500px;background:#000;border-radius:25px;overflow:hidden;border:6px solid rgba(255,255,255,.5)}
-#camera,#poseCanvas{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-#camera{transform:scaleX(-1)}
-.hint{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);font-size:26px;background:rgba(0,0,0,.55);padding:10px 24px;border-radius:999px}
-.question{text-align:center;font-size:48px;font-weight:bold;margin:25px}
-.answers{display:flex;gap:30px}
-.answer{flex:1;background:white;color:#111;border-radius:28px;text-align:center;font-size:64px;font-weight:bold;padding:35px}
-.answer.active{background:#ffd166;transform:scale(1.05)}
-.answer.correct{background:#22c55e;color:white}
-.answer.wrong{background:#ef4444;color:white}
-#feedback{text-align:center;font-size:48px;font-weight:bold;height:70px;margin-top:15px}
-.debug{position:fixed;left:15px;bottom:15px;background:rgba(0,0,0,.7);padding:10px 15px;border-radius:12px;font-size:20px}
-</style>
+  <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-<section id="selectPage" class="page active">
-  <div class="card">
-    <h1>🎮 นักล่าแม่สะกด Motion</h1>
-    <p>เลือกผู้เล่น ป.๔</p>
-    <input id="search" placeholder="ค้นหาชื่อนักเรียน...">
-    <div id="studentList"></div>
+  <div id="app">
+
+    <section id="pageHome" class="page active">
+      <div class="card home-card">
+        <div class="logo">🎮</div>
+        <h1>Thai Motion Learning</h1>
+        <p>เกมภาษาไทยขยับร่างกายด้วย AI</p>
+        <button id="btnGoSelect">เริ่มเล่น</button>
+      </div>
+    </section>
+
+    <section id="pageSelect" class="page">
+      <div class="card">
+        <h1>เลือกผู้เล่น ป.๔</h1>
+        <input id="searchStudent" placeholder="ค้นหาชื่อนักเรียน...">
+        <div id="studentList"></div>
+      </div>
+    </section>
+
+    <section id="pageReady" class="page">
+      <div class="card">
+        <div class="avatar">🧒</div>
+        <h2 id="readyName"></h2>
+        <p id="readyClass"></p>
+        <button id="btnStartGame">เริ่มเกม</button>
+        <button id="btnBackSelect" class="secondary">ย้อนกลับ</button>
+      </div>
+    </section>
+
+    <section id="pageGame" class="page game-page">
+      <div class="topbar">
+        <div class="pill">⭐ คะแนน <span id="score">๐</span></div>
+        <div class="pill player" id="playerName">ผู้เล่น</div>
+        <div class="pill">⏱ เวลา <span id="time">๖๐</span></div>
+      </div>
+
+      <div class="camera-box">
+        <video id="camera" autoplay playsinline muted></video>
+        <canvas id="poseCanvas"></canvas>
+        <div class="camera-hint">ยืนกลางกล้อง แล้วเอนซ้าย/ขวา</div>
+      </div>
+
+      <div class="question-panel">
+        <div class="stage-title">📚 ด่านภาษาไทย</div>
+        <div id="questionText">กำลังโหลดโจทย์...</div>
+      </div>
+
+      <div class="answer-row">
+        <div id="leftBox" class="answer-card left-card">
+          <div class="arrow">⬅️</div>
+          <div class="word">ซ้าย</div>
+        </div>
+
+        <div id="rightBox" class="answer-card right-card">
+          <div class="arrow">➡️</div>
+          <div class="word">ขวา</div>
+        </div>
+      </div>
+
+      <div id="feedback"></div>
+    </section>
+
+    <section id="pageSummary" class="page">
+      <div class="card">
+        <h1>สรุปผล</h1>
+        <h2 id="sumName"></h2>
+        <p>คะแนน: <span id="sumScore"></span></p>
+        <p>ถูก: <span id="sumCorrect"></span></p>
+        <p>ผิด: <span id="sumWrong"></span></p>
+        <p>ความแม่นยำ: <span id="sumAccuracy"></span>%</p>
+        <button id="btnPlayAgain">เล่นอีกครั้ง</button>
+      </div>
+    </section>
+
   </div>
-</section>
 
-<section id="readyPage" class="page">
-  <div class="card">
-    <h1>พร้อมเล่น</h1>
-    <h2 id="readyName"></h2>
-    <p id="readyClass"></p>
-    <button onclick="startCamera()">เริ่มเกม</button>
-  </div>
-</section>
+  <div id="debugBox">พร้อมเริ่มระบบ</div>
 
-<section id="gamePage" class="page">
-  <div class="hud">
-    <div>คะแนน <span id="score">๐</span></div>
-    <div id="playerName"></div>
-    <div>เวลา <span id="time">๖๐</span></div>
-  </div>
-
-  <div class="camera-wrap">
-    <video id="camera" autoplay playsinline muted></video>
-    <canvas id="poseCanvas"></canvas>
-    <div class="hint">ยืนกลางกล้อง แล้วเอนซ้าย/ขวาเพื่อเลือกคำตอบ</div>
-  </div>
-
-  <div id="questionText" class="question">กำลังโหลดโจทย์...</div>
-
-  <div class="answers">
-    <div id="leftBox" class="answer">ซ้าย</div>
-    <div id="rightBox" class="answer">ขวา</div>
-  </div>
-
-  <div id="feedback"></div>
-</section>
-
-<section id="summaryPage" class="page">
-  <div class="card">
-    <h1>สรุปผล</h1>
-    <h2 id="sumName"></h2>
-    <p>คะแนน: <span id="sumScore"></span></p>
-    <p>ถูก: <span id="sumCorrect"></span></p>
-    <p>ผิด: <span id="sumWrong"></span></p>
-    <p>ความแม่นยำ: <span id="sumAccuracy"></span>%</p>
-    <button onclick="location.reload()">เล่นอีกครั้ง</button>
-  </div>
-</section>
-
-<div id="debug" class="debug">กำลังโหลดข้อมูล...</div>
-
-<script>
-const API_URL = 'https://script.google.com/macros/s/AKfycbwaBShIUYJpAwyPZxyEUH2Ii-4tH9pP8dySPBuc4v0h9QYID-o_3lRK54yNv9Z_3-Ji/exec';
-
-let students=[], questions=[], selectedStudent=null;
-let score=0, correct=0, wrong=0, total=0, timeLeft=60;
-let timer=null, currentQuestion=null, canAnswer=true;
-let pose=null, cameraObj=null, motionLock=false;
-
-const thaiNum=n=>String(n).replace(/\d/g,d=>'๐๑๒๓๔๕๖๗๘๙'[d]);
-const debug=t=>document.getElementById('debug').textContent=t;
-
-function showPage(id){
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-}
-
-function jsonp(action, params={}){
-  return new Promise((resolve,reject)=>{
-    const cb='cb_'+Date.now()+Math.floor(Math.random()*1000);
-    window[cb]=data=>{
-      resolve(data);
-      delete window[cb];
-      script.remove();
-    };
-
-    const query=new URLSearchParams({...params,action,callback:cb});
-    const script=document.createElement('script');
-    script.src=API_URL+'?'+query.toString();
-    script.onerror=reject;
-    document.body.appendChild(script);
-  });
-}
-
-async function loadData(){
-  students=await jsonp('getStudents');
-  questions=await jsonp('getQuestions');
-  debug(`โหลดรายชื่อ ${students.length} คน | โหลดโจทย์ ${questions.length} ข้อ`);
-  renderStudents(students);
-}
-
-function renderStudents(list){
-  const box=document.getElementById('studentList');
-  box.innerHTML='';
-  list.forEach(stu=>{
-    const div=document.createElement('div');
-    div.className='student';
-    div.textContent=`เลขที่ ${thaiNum(stu.studentNo)} ${stu.studentName}`;
-    div.onclick=()=>selectStudent(stu);
-    box.appendChild(div);
-  });
-}
-
-document.getElementById('search').addEventListener('input',e=>{
-  const key=e.target.value.trim();
-  renderStudents(students.filter(s=>s.studentName.includes(key)));
-});
-
-function selectStudent(stu){
-  selectedStudent=stu;
-  document.getElementById('readyName').textContent=stu.studentName;
-  document.getElementById('readyClass').textContent=`${stu.className} เลขที่ ${thaiNum(stu.studentNo)}`;
-  document.getElementById('playerName').textContent=stu.studentName;
-  showPage('readyPage');
-}
-
-async function startCamera(){
-  showPage('gamePage');
-  await setupPose();
-  startGame();
-}
-
-async function setupPose(){
-  const video=document.getElementById('camera');
-  const canvas=document.getElementById('poseCanvas');
-  const ctx=canvas.getContext('2d');
-
-  pose=new Pose({
-    locateFile:file=>`https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`
-  });
-
-  pose.setOptions({
-    modelComplexity:0,
-    smoothLandmarks:true,
-    minDetectionConfidence:.5,
-    minTrackingConfidence:.5
-  });
-
-  pose.onResults(results=>{
-    canvas.width=canvas.clientWidth;
-    canvas.height=canvas.clientHeight;
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-
-    if(results.poseLandmarks){
-      drawPose(results.poseLandmarks,ctx,canvas);
-      detectMotion(results.poseLandmarks);
-    }
-  });
-
-  cameraObj=new Camera(video,{
-    onFrame:async()=>await pose.send({image:video}),
-    width:960,
-    height:540
-  });
-
-  await cameraObj.start();
-}
-
-function drawPose(lm,ctx,canvas){
-  [0,11,12,23,24].forEach(i=>{
-    const p=lm[i];
-    const x=canvas.width-(p.x*canvas.width);
-    const y=p.y*canvas.height;
-    ctx.fillStyle='white';
-    ctx.beginPath();
-    ctx.arc(x,y,9,0,Math.PI*2);
-    ctx.fill();
-  });
-}
-
-function detectMotion(lm){
-  if(!canAnswer||motionLock)return;
-
-  const shoulder=((lm[11].x+lm[12].x)/2);
-  const hip=((lm[23].x+lm[24].x)/2);
-  const lean=shoulder-hip;
-
-  leftBox.classList.remove('active');
-  rightBox.classList.remove('active');
-
-  if(lean>.075){
-    leftBox.classList.add('active');
-    motionChoose('left');
-  }else if(lean<-.075){
-    rightBox.classList.add('active');
-    motionChoose('right');
-  }
-}
-
-function motionChoose(side){
-  motionLock=true;
-  choose(side);
-  setTimeout(()=>motionLock=false,1200);
-}
-
-function startGame(){
-  score=correct=wrong=total=0;
-  timeLeft=60;
-  updateHUD();
-  nextQuestion();
-
-  timer=setInterval(()=>{
-    timeLeft--;
-    updateHUD();
-    if(timeLeft<=0)endGame();
-  },1000);
-
-  window.addEventListener('keydown',e=>{
-    if(e.key==='ArrowLeft')choose('left');
-    if(e.key==='ArrowRight')choose('right');
-  });
-}
-
-function updateHUD(){
-  document.getElementById('score').textContent=thaiNum(score);
-  document.getElementById('time').textContent=thaiNum(timeLeft);
-}
-
-function nextQuestion(){
-  canAnswer=true;
-  currentQuestion=questions[Math.floor(Math.random()*questions.length)];
-
-  questionText.textContent=currentQuestion.question;
-  leftBox.textContent=currentQuestion.leftWord;
-  rightBox.textContent=currentQuestion.rightWord;
-  leftBox.className='answer';
-  rightBox.className='answer';
-  feedback.textContent='';
-}
-
-function choose(side){
-  if(!canAnswer)return;
-  canAnswer=false;
-  total++;
-
-  const isCorrect=side===currentQuestion.correctSide;
-  const box=side==='left'?leftBox:rightBox;
-
-  if(isCorrect){
-    score+=10;
-    correct++;
-    box.classList.add('correct');
-    feedback.textContent='✅ ถูกต้อง +๑๐';
-  }else{
-    wrong++;
-    box.classList.add('wrong');
-    feedback.textContent='❌ ผิด';
-  }
-
-  updateHUD();
-  setTimeout(()=>{if(timeLeft>0)nextQuestion()},900);
-}
-
-async function endGame(){
-  clearInterval(timer);
-  if(cameraObj)cameraObj.stop();
-
-  const accuracy=total?Math.round((correct/total)*100):0;
-
-  sumName.textContent=selectedStudent.studentName;
-  sumScore.textContent=thaiNum(score);
-  sumCorrect.textContent=thaiNum(correct);
-  sumWrong.textContent=thaiNum(wrong);
-  sumAccuracy.textContent=thaiNum(accuracy);
-
-  await jsonp('saveScore',{
-    className:selectedStudent.className,
-    studentName:selectedStudent.studentName,
-    score,correct,wrong,total,accuracy
-  });
-
-  showPage('summaryPage');
-}
-
-loadData();
-</script>
+  <script src="api.js"></script>
+  <script src="ui.js"></script>
+  <script src="camera.js"></script>
+  <script src="pose.js"></script>
+  <script src="game.js"></script>
+  <script src="audio.js"></script>
+  <script src="app.js"></script>
 
 </body>
 </html>
