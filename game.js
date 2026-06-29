@@ -1,30 +1,32 @@
-let score = 0;
-let correct = 0;
-let wrong = 0;
-let total = 0;
-let timeLeft = 60;
-let timer = null;
+let scoreValue = 0;
+let correctValue = 0;
+let wrongValue = 0;
+let totalValue = 0;
+let timeLeftValue = 60;
+let timerId = null;
 let currentQuestion = null;
-let canAnswer = false;
+
+window.canAnswer = false;
 
 const MAX_WRONG = 3;
 
 function startGame() {
-  score = 0;
-  correct = 0;
-  wrong = 0;
-  total = 0;
-  timeLeft = 60;
-  canAnswer = true;
+  scoreValue = 0;
+  correctValue = 0;
+  wrongValue = 0;
+  totalValue = 0;
+  timeLeftValue = 60;
+  currentQuestion = null;
+  window.canAnswer = true;
 
   updateHUD();
   nextQuestion();
 
-  timer = setInterval(() => {
-    timeLeft--;
+  timerId = setInterval(() => {
+    timeLeftValue--;
     updateHUD();
 
-    if (timeLeft <= 0) {
+    if (timeLeftValue <= 0) {
       endGame();
     }
   }, 1000);
@@ -33,8 +35,8 @@ function startGame() {
 }
 
 function updateHUD() {
-  document.getElementById("score").textContent = thaiNum(score);
-  document.getElementById("time").textContent = thaiNum(timeLeft);
+  document.getElementById("score").textContent = thaiNum(scoreValue);
+  document.getElementById("time").textContent = thaiNum(timeLeftValue);
 }
 
 function nextQuestion() {
@@ -43,7 +45,7 @@ function nextQuestion() {
     return;
   }
 
-  canAnswer = true;
+  window.canAnswer = true;
 
   const randomIndex = Math.floor(Math.random() * questions.length);
   currentQuestion = questions[randomIndex];
@@ -52,34 +54,34 @@ function nextQuestion() {
   document.querySelector("#leftBox .word").textContent = currentQuestion.leftWord;
   document.querySelector("#rightBox .word").textContent = currentQuestion.rightWord;
 
-  leftBox.className = "answer-card left-card";
-  rightBox.className = "answer-card right-card";
-  feedback.textContent = "";
+  document.getElementById("leftBox").className = "answer-card left-card";
+  document.getElementById("rightBox").className = "answer-card right-card";
+  document.getElementById("feedback").textContent = "";
 }
 
 function chooseAnswer(side) {
-  if (!canAnswer || !currentQuestion) return;
+  if (!window.canAnswer || !currentQuestion) return;
 
-  canAnswer = false;
-  total++;
+  window.canAnswer = false;
+  totalValue++;
 
   const correctSide = String(currentQuestion.correctSide).trim().toLowerCase();
   const isCorrect = side === correctSide;
-  const target = side === "left" ? leftBox : rightBox;
+  const targetBox = document.getElementById(side === "left" ? "leftBox" : "rightBox");
 
   if (isCorrect) {
-    score += 10;
-    correct++;
-    target.classList.add("correct");
-    feedback.textContent = "⭐ ถูกต้อง +๑๐";
+    scoreValue += 10;
+    correctValue++;
+    targetBox.classList.add("correct");
+    document.getElementById("feedback").textContent = "⭐ ถูกต้อง +๑๐";
     playCorrectSound();
   } else {
-    wrong++;
-    target.classList.add("wrong");
+    wrongValue++;
+    targetBox.classList.add("wrong");
     playWrongSound();
 
-    if (wrong >= MAX_WRONG) {
-      feedback.textContent = "💥 ผิดครบ ๓ ครั้ง จบเกม!";
+    if (wrongValue >= MAX_WRONG) {
+      document.getElementById("feedback").textContent = "💥 ผิดครบ ๓ ครั้ง จบเกม!";
       updateHUD();
 
       setTimeout(() => {
@@ -89,13 +91,14 @@ function chooseAnswer(side) {
       return;
     }
 
-    feedback.textContent = `❌ ผิด เหลือโอกาส ${thaiNum(MAX_WRONG - wrong)} ครั้ง`;
+    document.getElementById("feedback").textContent =
+      `❌ ผิด เหลือโอกาส ${thaiNum(MAX_WRONG - wrongValue)} ครั้ง`;
   }
 
   updateHUD();
 
   setTimeout(() => {
-    if (timeLeft > 0) {
+    if (timeLeftValue > 0) {
       nextQuestion();
     }
   }, 900);
@@ -107,31 +110,32 @@ function handleKeyboard(e) {
 }
 
 async function endGame() {
-  clearInterval(timer);
-  window.removeEventListener("keydown", handleKeyboard);
+  clearInterval(timerId);
+  timerId = null;
 
-  canAnswer = false;
+  window.removeEventListener("keydown", handleKeyboard);
+  window.canAnswer = false;
 
   if (typeof stopPoseAI === "function") stopPoseAI();
   if (typeof closeCamera === "function") closeCamera();
 
-  const accuracy = total > 0 ? Math.round((correct / total) * 100) : 0;
+  const accuracy = totalValue > 0 ? Math.round((correctValue / totalValue) * 100) : 0;
 
-  sumName.textContent = selectedStudent.studentName;
-  sumScore.textContent = thaiNum(score);
-  sumCorrect.textContent = thaiNum(correct);
-  sumWrong.textContent = thaiNum(wrong);
-  sumAccuracy.textContent = thaiNum(accuracy);
+  document.getElementById("sumName").textContent = selectedStudent.studentName;
+  document.getElementById("sumScore").textContent = thaiNum(scoreValue);
+  document.getElementById("sumCorrect").textContent = thaiNum(correctValue);
+  document.getElementById("sumWrong").textContent = thaiNum(wrongValue);
+  document.getElementById("sumAccuracy").textContent = thaiNum(accuracy);
 
   try {
     await saveScoreToAPI({
       className: selectedStudent.className,
       studentName: selectedStudent.studentName,
-      score,
-      correct,
-      wrong,
-      total,
-      accuracy
+      score: scoreValue,
+      correct: correctValue,
+      wrong: wrongValue,
+      total: totalValue,
+      accuracy: accuracy
     });
   } catch (err) {
     console.error(err);
