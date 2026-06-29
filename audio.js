@@ -21,7 +21,7 @@ function playTone(frequency, duration) {
     oscillator.connect(gain);
     gain.connect(ctx.destination);
 
-    gain.gain.setValueAtTime(0.2, ctx.currentTime);
+    gain.gain.setValueAtTime(0.18, ctx.currentTime);
     gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
 
     oscillator.start(ctx.currentTime);
