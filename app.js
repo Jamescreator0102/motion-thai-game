@@ -12,8 +12,8 @@ async function initApp() {
     questions = await getQuestionsFromAPI();
 
     debug(`โหลดรายชื่อ ${students.length} คน | โหลดโจทย์ ${questions.length} ข้อ`);
-    setupEvents();
 
+    setupEvents();
   } catch (err) {
     console.error(err);
     debug("โหลดข้อมูลไม่สำเร็จ");
@@ -22,23 +22,32 @@ async function initApp() {
 }
 
 function setupEvents() {
-  btnGoSelect.onclick = () => {
+  document.getElementById("btnGoSelect").onclick = () => {
     renderStudents(students);
     showPage("pageSelect");
   };
 
-  searchStudent.oninput = e => {
+  document.getElementById("searchStudent").oninput = e => {
     const key = e.target.value.trim();
-    renderStudents(students.filter(s => String(s.studentName).includes(key)));
+    const filtered = students.filter(stu =>
+      String(stu.studentName).includes(key)
+    );
+    renderStudents(filtered);
   };
 
-  btnBackSelect.onclick = () => {
+  document.getElementById("btnBackSelect").onclick = () => {
     showPage("pageSelect");
   };
 
-  btnStartGame.onclick = async () => {
+  document.getElementById("btnStartGame").onclick = async () => {
     try {
+      if (!selectedStudent) {
+        alert("กรุณาเลือกนักเรียนก่อนครับ");
+        return;
+      }
+
       showPage("pageGame");
+
       debug("กำลังเปิดกล้อง...");
       await openCamera();
 
@@ -47,7 +56,6 @@ function setupEvents() {
 
       debug("เริ่มเกม");
       startGame();
-
     } catch (err) {
       console.error(err);
       alert("เริ่มเกมไม่สำเร็จ: " + err.message);
@@ -55,7 +63,7 @@ function setupEvents() {
     }
   };
 
-  btnPlayAgain.onclick = () => {
+  document.getElementById("btnPlayAgain").onclick = () => {
     location.reload();
   };
 }
