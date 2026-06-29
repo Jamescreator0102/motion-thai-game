@@ -5,22 +5,17 @@ let total = 0;
 let timeLeft = 60;
 let timer = null;
 let currentQuestion = null;
-let canAnswer = true;
+let canAnswer = false;
 
-function resetGame() {
+function startGame() {
   score = 0;
   correct = 0;
   wrong = 0;
   total = 0;
   timeLeft = 60;
-  currentQuestion = null;
   canAnswer = true;
 
   updateHUD();
-}
-
-function startGame() {
-  resetGame();
   nextQuestion();
 
   timer = setInterval(() => {
@@ -52,12 +47,12 @@ function nextQuestion() {
   currentQuestion = questions[randomIndex];
 
   document.getElementById("questionText").textContent = currentQuestion.question;
-  document.getElementById("leftBox").textContent = currentQuestion.leftWord;
-  document.getElementById("rightBox").textContent = currentQuestion.rightWord;
+  document.querySelector("#leftBox .word").textContent = currentQuestion.leftWord;
+  document.querySelector("#rightBox .word").textContent = currentQuestion.rightWord;
 
-  document.getElementById("leftBox").className = "answer-box";
-  document.getElementById("rightBox").className = "answer-box";
-  document.getElementById("feedback").textContent = "";
+  leftBox.className = "answer-card left-card";
+  rightBox.className = "answer-card right-card";
+  feedback.textContent = "";
 }
 
 function chooseAnswer(side) {
@@ -69,17 +64,19 @@ function chooseAnswer(side) {
   const correctSide = String(currentQuestion.correctSide).trim().toLowerCase();
   const isCorrect = side === correctSide;
 
-  const targetBox = document.getElementById(side === "left" ? "leftBox" : "rightBox");
+  const target = side === "left" ? leftBox : rightBox;
 
   if (isCorrect) {
     score += 10;
     correct++;
-    targetBox.classList.add("correct");
-    document.getElementById("feedback").textContent = "✅ ถูกต้อง +๑๐";
+    target.classList.add("correct");
+    feedback.textContent = "⭐ ถูกต้อง +๑๐";
+    playCorrectSound();
   } else {
     wrong++;
-    targetBox.classList.add("wrong");
-    document.getElementById("feedback").textContent = "❌ ผิด";
+    target.classList.add("wrong");
+    feedback.textContent = "❌ ผิด";
+    playWrongSound();
   }
 
   updateHUD();
@@ -92,27 +89,25 @@ function chooseAnswer(side) {
 }
 
 function handleKeyboard(e) {
-  if (e.key === "ArrowLeft") {
-    chooseAnswer("left");
-  }
-
-  if (e.key === "ArrowRight") {
-    chooseAnswer("right");
-  }
+  if (e.key === "ArrowLeft") chooseAnswer("left");
+  if (e.key === "ArrowRight") chooseAnswer("right");
 }
 
 async function endGame() {
   clearInterval(timer);
   window.removeEventListener("keydown", handleKeyboard);
+
+  canAnswer = false;
+  stopPoseAI();
   closeCamera();
 
   const accuracy = total > 0 ? Math.round((correct / total) * 100) : 0;
 
-  document.getElementById("sumName").textContent = selectedStudent.studentName;
-  document.getElementById("sumScore").textContent = thaiNum(score);
-  document.getElementById("sumCorrect").textContent = thaiNum(correct);
-  document.getElementById("sumWrong").textContent = thaiNum(wrong);
-  document.getElementById("sumAccuracy").textContent = thaiNum(accuracy);
+  sumName.textContent = selectedStudent.studentName;
+  sumScore.textContent = thaiNum(score);
+  sumCorrect.textContent = thaiNum(correct);
+  sumWrong.textContent = thaiNum(wrong);
+  sumAccuracy.textContent = thaiNum(accuracy);
 
   try {
     await saveScoreToAPI({
@@ -124,8 +119,8 @@ async function endGame() {
       total,
       accuracy
     });
-  } catch (error) {
-    console.error(error);
+  } catch (err) {
+    console.error(err);
   }
 
   showPage("pageSummary");
