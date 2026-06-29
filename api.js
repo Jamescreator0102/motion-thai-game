@@ -1,42 +1,40 @@
-const API_URL = "https://script.google.com/macros/s/AKfycbwaBShIUYJpAwyPZxyEUH2Ii-4tH9pP8dySPBuc4v0h9QYID-o_3lRK54yNv9Z_3-Ji/exec";
+let students = [];
+let questions = [];
+let selectedStudent = null;
 
-function apiJSONP(action, params = {}) {
-  return new Promise((resolve, reject) => {
-    const callbackName = "jsonp_callback_" + Date.now() + "_" + Math.floor(Math.random() * 10000);
+document.addEventListener("DOMContentLoaded", async () => {
+  debug("กำลังโหลดข้อมูล...");
 
-    window[callbackName] = function (data) {
-      resolve(data);
-      delete window[callbackName];
-      script.remove();
-    };
+  students = await getStudentsFromAPI();
+  questions = await getQuestionsFromAPI();
 
-    const query = new URLSearchParams({
-      action: action,
-      callback: callbackName,
-      ...params
-    });
+  debug(`โหลดรายชื่อ ${students.length} คน | โหลดโจทย์ ${questions.length} ข้อ`);
 
-    const script = document.createElement("script");
-    script.src = API_URL + "?" + query.toString();
-
-    script.onerror = function () {
-      reject(new Error("เชื่อมต่อ API ไม่สำเร็จ"));
-      delete window[callbackName];
-      script.remove();
-    };
-
-    document.body.appendChild(script);
+  document.getElementById("btnGoSelect").addEventListener("click", () => {
+    showPage("pageSelect");
+    renderStudents(students);
   });
-}
 
-async function getStudentsFromAPI() {
-  return await apiJSONP("getStudents");
-}
+  document.getElementById("btnBackSelect").addEventListener("click", () => {
+    showPage("pageSelect");
+  });
 
-async function getQuestionsFromAPI() {
-  return await apiJSONP("getQuestions");
-}
+  document.getElementById("btnPlayAgain").addEventListener("click", () => {
+    location.reload();
+  });
 
-async function saveScoreToAPI(scoreData) {
-  return await apiJSONP("saveScore", scoreData);
-}
+  document.getElementById("searchStudent").addEventListener("input", e => {
+    const keyword = e.target.value.trim();
+    const filtered = students.filter(stu =>
+      String(stu.studentName).includes(keyword)
+    );
+    renderStudents(filtered);
+  });
+
+  document.getElementById("btnStartGame").addEventListener("click", async () => {
+    showPage("pageGame");
+    await openCamera();
+    await setupPoseAI();
+    startGame();
+  });
+});
