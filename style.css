@@ -1,30 +1,15 @@
-*{
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
-  font-family:"Sarabun","TH Sarabun New",sans-serif;
-}
+*{margin:0;padding:0;box-sizing:border-box;font-family:"Sarabun","TH Sarabun New",sans-serif}
 
 body{
   min-height:100vh;
   overflow:hidden;
   color:white;
-  background:
-    radial-gradient(circle at top left,#ffe066 0%,transparent 25%),
-    linear-gradient(135deg,#1687ff,#00c2ff 45%,#35e87b);
+  background:radial-gradient(circle at top left,#ffe066 0%,transparent 25%),
+             linear-gradient(135deg,#1687ff,#00c2ff 45%,#35e87b);
 }
 
-.page{
-  display:none;
-  width:100vw;
-  height:100vh;
-}
-
-.page.active{
-  display:flex;
-  justify-content:center;
-  align-items:center;
-}
+.page{display:none;width:100vw;height:100vh}
+.page.active{display:flex;justify-content:center;align-items:center}
 
 .card{
   width:min(900px,92%);
@@ -37,19 +22,10 @@ body{
   text-align:center;
 }
 
-h1{
-  font-size:56px;
-  text-shadow:0 5px 0 rgba(0,0,0,.28);
-}
-
-h2{
-  font-size:42px;
-}
-
-p{
-  font-size:28px;
-  margin-top:10px;
-}
+.logo,.avatar{font-size:110px}
+h1{font-size:56px;text-shadow:0 5px 0 rgba(0,0,0,.28)}
+h2{font-size:42px}
+p{font-size:28px;margin-top:10px}
 
 input{
   width:100%;
@@ -74,18 +50,14 @@ button{
   box-shadow:0 9px 0 #9a4b00,0 18px 32px rgba(0,0,0,.28);
 }
 
-.btn-secondary,.secondary{
+.secondary{
   background:linear-gradient(180deg,#9ca3af,#4b5563);
   box-shadow:0 9px 0 #1f2937,0 18px 32px rgba(0,0,0,.28);
 }
 
-.student-list,#studentList{
-  height:420px;
-  overflow-y:auto;
-  padding-right:8px;
-}
+#studentList{height:420px;overflow-y:auto;padding-right:8px}
 
-.student,.student-item{
+.student-item{
   background:#fff;
   color:#111827;
   margin:12px 0;
@@ -98,28 +70,18 @@ button{
   box-shadow:0 8px 0 rgba(0,0,0,.18);
 }
 
-.student:hover,.student-item:hover{
-  transform:scale(1.03);
-  background:#fff3a3;
-}
+.student-item:hover{transform:scale(1.03);background:#fff3a3}
 
-.avatar{
-  font-size:120px;
-}
+.game-page.active{display:block;padding:18px 26px}
 
-#pageGame.active,.game-page.active{
-  display:block;
-  padding:18px 26px;
-}
-
-.hud,.topbar{
+.topbar{
   display:grid;
   grid-template-columns:1fr 1.4fr 1fr;
   gap:16px;
   margin-bottom:14px;
 }
 
-.hud > div,.pill{
+.pill{
   background:rgba(0,61,122,.75);
   border:4px solid rgba(255,255,255,.55);
   border-radius:999px;
@@ -131,11 +93,9 @@ button{
   box-shadow:0 8px 20px rgba(0,0,0,.25);
 }
 
-#playerName,.player{
-  background:rgba(88,28,135,.78)!important;
-}
+.player{background:rgba(88,28,135,.78)}
 
-.camera-wrap,.camera-box{
+.camera-box{
   position:relative;
   width:100%;
   height:45vh;
@@ -161,7 +121,7 @@ button{
   height:100%;
 }
 
-.hint,.camera-hint{
+.camera-hint{
   position:absolute;
   left:50%;
   bottom:18px;
@@ -173,32 +133,39 @@ button{
   font-weight:900;
 }
 
-.question-text,#questionText{
-  width:100%;
+.question-panel{
   margin:14px 0 12px;
-  padding:18px 30px;
+  padding:16px 24px;
   border-radius:30px;
   border:6px solid white;
   text-align:center;
-  color:white;
-  font-size:48px;
-  font-weight:900;
   background:radial-gradient(circle at center,#a855f7 0%,#6d28d9 55%,#3b0764 100%);
-  text-shadow:0 5px 0 rgba(0,0,0,.45);
-  box-shadow:
-    inset 0 0 20px rgba(255,255,255,.22),
-    0 8px 0 rgba(0,0,0,.28),
-    0 18px 35px rgba(0,0,0,.26);
+  box-shadow:inset 0 0 20px rgba(255,255,255,.22),
+             0 8px 0 rgba(0,0,0,.28),
+             0 18px 35px rgba(0,0,0,.26);
 }
 
-.answers,.answer-row{
+.stage-title{
+  font-size:24px;
+  font-weight:900;
+  color:#ffe66d;
+  text-shadow:0 3px 0 rgba(0,0,0,.35);
+}
+
+#questionText{
+  font-size:46px;
+  font-weight:900;
+  line-height:1.15;
+  text-shadow:0 5px 0 rgba(0,0,0,.45);
+}
+
+.answer-row{
   display:grid;
   grid-template-columns:1fr 1fr;
   gap:28px;
-  width:100%;
 }
 
-.answer-box,.answer-card{
+.answer-card{
   min-height:132px;
   border:6px solid white;
   border-radius:30px;
@@ -210,43 +177,21 @@ button{
   color:white;
   font-size:58px;
   font-weight:900;
-  text-align:center;
   text-shadow:0 5px 0 rgba(0,0,0,.42);
-  box-shadow:
-    inset 0 0 22px rgba(255,255,255,.25),
-    0 9px 0 rgba(0,0,0,.28),
-    0 18px 35px rgba(0,0,0,.28);
+  box-shadow:inset 0 0 22px rgba(255,255,255,.25),
+             0 9px 0 rgba(0,0,0,.28),
+             0 18px 35px rgba(0,0,0,.28);
   transition:.18s;
 }
 
-#leftBox,.left-card{
-  background:linear-gradient(180deg,#22c7ff,#075ecc);
-}
+.left-card{background:linear-gradient(180deg,#22c7ff,#075ecc)}
+.right-card{background:linear-gradient(180deg,#ffd43b,#fb8500)}
 
-#rightBox,.right-card{
-  background:linear-gradient(180deg,#ffd43b,#fb8500);
-}
+.answer-card.active{transform:scale(1.06) translateY(-5px);filter:brightness(1.18)}
+.answer-card.correct{background:linear-gradient(180deg,#4ade80,#16a34a)!important}
+.answer-card.wrong{background:linear-gradient(180deg,#ff6b6b,#dc2626)!important}
 
-#leftBox::before{
-  content:"⬅️ ";
-}
-
-#rightBox::after{
-  content:" ➡️";
-}
-
-.answer-box.active,.answer-card.active{
-  transform:scale(1.06) translateY(-5px);
-  filter:brightness(1.18);
-}
-
-.answer-box.correct,.answer-card.correct{
-  background:linear-gradient(180deg,#4ade80,#16a34a)!important;
-}
-
-.answer-box.wrong,.answer-card.wrong{
-  background:linear-gradient(180deg,#ff6b6b,#dc2626)!important;
-}
+.word{font-size:62px}
 
 #feedback{
   height:62px;
@@ -271,33 +216,11 @@ button{
 }
 
 @media(max-width:800px){
-  .hud,.topbar{
-    grid-template-columns:1fr;
-    gap:8px;
-  }
-
-  .hud > div,.pill{
-    font-size:22px;
-    padding:8px 12px;
-  }
-
-  .camera-wrap,.camera-box{
-    height:35vh;
-    min-height:250px;
-  }
-
-  .question-text,#questionText{
-    font-size:34px;
-    padding:14px;
-  }
-
-  .answers,.answer-row{
-    gap:14px;
-  }
-
-  .answer-box,.answer-card{
-    min-height:105px;
-    padding:18px 10px;
-    font-size:38px;
-  }
+  .topbar{grid-template-columns:1fr;gap:8px}
+  .pill{font-size:22px;padding:8px 12px}
+  .camera-box{height:35vh;min-height:250px}
+  #questionText{font-size:34px}
+  .answer-row{gap:14px}
+  .answer-card{min-height:105px;padding:18px 10px;font-size:36px}
+  .word{font-size:38px}
 }
