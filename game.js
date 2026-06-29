@@ -74,11 +74,18 @@ function chooseAnswer(side) {
     playCorrectSound();
   } else {
     wrong++;
-    target.classList.add("wrong");
-    feedback.textContent = "❌ ผิด";
-    playWrongSound();
-  }
+target.classList.add("wrong");
+playWrongSound();
 
+if (wrong >= 3) {
+  feedback.textContent = "❌ ผิดครบ ๓ ครั้ง จบเกม!";
+  setTimeout(() => {
+    endGame();
+  }, 900);
+  return;
+} else {
+  feedback.textContent = `❌ ผิด เหลือโอกาส ${thaiNum(3 - wrong)} ครั้ง`;
+}
   updateHUD();
 
   setTimeout(() => {
