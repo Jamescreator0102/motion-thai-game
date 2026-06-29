@@ -56,26 +56,19 @@ function nextQuestion() {
 }
 
 function chooseAnswer(side) {
-  if (!canAnswer || !currentQuestion) return;
-
-  canAnswer = false;
-  total++;
-
-  const correctSide = String(currentQuestion.correctSide).trim().toLowerCase();
-  const isCorrect = side === correctSide;
-
-  const target = side === "left" ? leftBox : rightBox;
-
-  if (isCorrect) {
-    score += 10;
-    correct++;
-    target.classList.add("correct");
-    feedback.textContent = "⭐ ถูกต้อง +๑๐";
-    playCorrectSound();
-  } else {
-    wrong++;
+  wrong++;
 target.classList.add("wrong");
 playWrongSound();
+
+if (wrong >= 3) {
+  feedback.textContent = "❌ ผิดครบ ๓ ครั้ง จบเกม!";
+  setTimeout(() => {
+    endGame();
+  }, 900);
+  return;
+} else {
+  feedback.textContent = `❌ ผิด เหลือโอกาส ${thaiNum(3 - wrong)} ครั้ง`;
+}
 
 if (wrong >= 3) {
   feedback.textContent = "❌ ผิดครบ ๓ ครั้ง จบเกม!";
