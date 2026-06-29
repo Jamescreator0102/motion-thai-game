@@ -14,7 +14,6 @@ function showPage(pageId) {
   document.querySelectorAll(".page").forEach(page => {
     page.classList.remove("active");
   });
-
   document.getElementById(pageId).classList.add("active");
 }
 
@@ -32,7 +31,7 @@ function renderStudents(list) {
     item.className = "student-item";
     item.textContent = `เลขที่ ${thaiNum(stu.studentNo)} ${stu.studentName}`;
 
-    item.addEventListener("click", () => {
+    item.onclick = () => {
       selectedStudent = stu;
 
       document.getElementById("readyName").textContent = stu.studentName;
@@ -41,7 +40,7 @@ function renderStudents(list) {
       document.getElementById("playerName").textContent = stu.studentName;
 
       showPage("pageReady");
-    });
+    };
 
     box.appendChild(item);
   });
