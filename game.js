@@ -10,226 +10,132 @@ let canAnswer = false;
 const MAX_WRONG = 3;
 
 function startGame() {
+  score = 0;
+  correct = 0;
+  wrong = 0;
+  total = 0;
+  timeLeft = 60;
+  canAnswer = true;
 
-    score = 0;
-    correct = 0;
-    wrong = 0;
-    total = 0;
-    timeLeft = 60;
+  updateHUD();
+  nextQuestion();
 
-    canAnswer = true;
-
+  timer = setInterval(() => {
+    timeLeft--;
     updateHUD();
 
-    nextQuestion();
+    if (timeLeft <= 0) {
+      endGame();
+    }
+  }, 1000);
 
-    timer = setInterval(() => {
-
-        timeLeft--;
-
-        updateHUD();
-
-        if (timeLeft <= 0) {
-            endGame();
-        }
-
-    }, 1000);
-
-    window.addEventListener("keydown", handleKeyboard);
-
+  window.addEventListener("keydown", handleKeyboard);
 }
 
 function updateHUD() {
-
-    score.textContent = thaiNum(score);
-
-    document.getElementById("score").textContent = thaiNum(score);
-    document.getElementById("time").textContent = thaiNum(timeLeft);
-
+  document.getElementById("score").textContent = thaiNum(score);
+  document.getElementById("time").textContent = thaiNum(timeLeft);
 }
 
 function nextQuestion() {
+  if (!questions || questions.length === 0) {
+    alert("ยังไม่มีโจทย์ในชีต Questions");
+    return;
+  }
 
-    if (!questions || questions.length === 0) {
+  canAnswer = true;
 
-        alert("ยังไม่มีข้อมูลคำถาม");
+  const randomIndex = Math.floor(Math.random() * questions.length);
+  currentQuestion = questions[randomIndex];
 
-        return;
+  document.getElementById("questionText").textContent = currentQuestion.question;
+  document.querySelector("#leftBox .word").textContent = currentQuestion.leftWord;
+  document.querySelector("#rightBox .word").textContent = currentQuestion.rightWord;
 
-    }
-
-    canAnswer = true;
-
-    const randomIndex = Math.floor(Math.random() * questions.length);
-
-    currentQuestion = questions[randomIndex];
-
-    questionText.textContent = currentQuestion.question;
-
-    document.querySelector("#leftBox .word").textContent =
-        currentQuestion.leftWord;
-
-    document.querySelector("#rightBox .word").textContent =
-        currentQuestion.rightWord;
-
-    leftBox.className = "answer-card left-card";
-    rightBox.className = "answer-card right-card";
-
-    feedback.textContent = "";
-
+  leftBox.className = "answer-card left-card";
+  rightBox.className = "answer-card right-card";
+  feedback.textContent = "";
 }
 
 function chooseAnswer(side) {
+  if (!canAnswer || !currentQuestion) return;
 
-    if (!canAnswer) return;
+  canAnswer = false;
+  total++;
 
-    if (!currentQuestion) return;
+  const correctSide = String(currentQuestion.correctSide).trim().toLowerCase();
+  const isCorrect = side === correctSide;
+  const target = side === "left" ? leftBox : rightBox;
 
-    canAnswer = false;
+  if (isCorrect) {
+    score += 10;
+    correct++;
+    target.classList.add("correct");
+    feedback.textContent = "⭐ ถูกต้อง +๑๐";
+    playCorrectSound();
+  } else {
+    wrong++;
+    target.classList.add("wrong");
+    playWrongSound();
 
-    total++;
+    if (wrong >= MAX_WRONG) {
+      feedback.textContent = "💥 ผิดครบ ๓ ครั้ง จบเกม!";
+      updateHUD();
 
-    const correctSide = String(currentQuestion.correctSide)
-        .trim()
-        .toLowerCase();
+      setTimeout(() => {
+        endGame();
+      }, 1200);
 
-    const isCorrect = side === correctSide;
-
-    const target =
-        side === "left"
-            ? leftBox
-            : rightBox;
-
-    if (isCorrect) {
-
-        score += 10;
-
-        correct++;
-
-        target.classList.add("correct");
-
-        feedback.textContent = "⭐⭐ ถูกต้อง +๑๐";
-
-        playCorrectSound();
-
-    } else {
-
-        wrong++;
-
-        target.classList.add("wrong");
-
-        playWrongSound();
-
-        if (wrong >= MAX_WRONG) {
-
-            feedback.textContent =
-                "💥 ผิดครบ ๓ ครั้ง เกมจบ";
-
-            updateHUD();
-
-            setTimeout(() => {
-
-                endGame();
-
-            }, 1200);
-
-            return;
-
-        }
-
-        feedback.textContent =
-            `❌ ผิด เหลืออีก ${thaiNum(MAX_WRONG - wrong)} ครั้ง`;
-
+      return;
     }
 
-    updateHUD();
+    feedback.textContent = `❌ ผิด เหลือโอกาส ${thaiNum(MAX_WRONG - wrong)} ครั้ง`;
+  }
 
-    setTimeout(() => {
+  updateHUD();
 
-        if (timeLeft > 0) {
-
-            nextQuestion();
-
-        }
-
-    }, 900);
-
+  setTimeout(() => {
+    if (timeLeft > 0) {
+      nextQuestion();
+    }
+  }, 900);
 }
 
 function handleKeyboard(e) {
-
-    if (e.key === "ArrowLeft") {
-
-        chooseAnswer("left");
-
-    }
-
-    if (e.key === "ArrowRight") {
-
-        chooseAnswer("right");
-
-    }
-
+  if (e.key === "ArrowLeft") chooseAnswer("left");
+  if (e.key === "ArrowRight") chooseAnswer("right");
 }
 
 async function endGame() {
+  clearInterval(timer);
+  window.removeEventListener("keydown", handleKeyboard);
 
-    clearInterval(timer);
+  canAnswer = false;
 
-    window.removeEventListener(
-        "keydown",
-        handleKeyboard
-    );
+  if (typeof stopPoseAI === "function") stopPoseAI();
+  if (typeof closeCamera === "function") closeCamera();
 
-    canAnswer = false;
+  const accuracy = total > 0 ? Math.round((correct / total) * 100) : 0;
 
-    stopPoseAI();
+  sumName.textContent = selectedStudent.studentName;
+  sumScore.textContent = thaiNum(score);
+  sumCorrect.textContent = thaiNum(correct);
+  sumWrong.textContent = thaiNum(wrong);
+  sumAccuracy.textContent = thaiNum(accuracy);
 
-    closeCamera();
+  try {
+    await saveScoreToAPI({
+      className: selectedStudent.className,
+      studentName: selectedStudent.studentName,
+      score,
+      correct,
+      wrong,
+      total,
+      accuracy
+    });
+  } catch (err) {
+    console.error(err);
+  }
 
-    const accuracy =
-        total > 0
-            ? Math.round(correct / total * 100)
-            : 0;
-
-    sumName.textContent = selectedStudent.studentName;
-
-    sumScore.textContent = thaiNum(score);
-
-    sumCorrect.textContent = thaiNum(correct);
-
-    sumWrong.textContent = thaiNum(wrong);
-
-    sumAccuracy.textContent = thaiNum(accuracy);
-
-    try {
-
-        await saveScoreToAPI({
-
-            className:
-                selectedStudent.className,
-
-            studentName:
-                selectedStudent.studentName,
-
-            score,
-
-            correct,
-
-            wrong,
-
-            total,
-
-            accuracy
-
-        });
-
-    } catch (err) {
-
-        console.error(err);
-
-    }
-
-    showPage("pageSummary");
-
+  showPage("pageSummary");
 }
