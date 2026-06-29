@@ -5,25 +5,26 @@ function apiJSONP(action, params = {}) {
     const callbackName =
       "jsonp_callback_" + Date.now() + "_" + Math.floor(Math.random() * 10000);
 
-    window[callbackName] = function (data) {
+    const script = document.createElement("script");
+
+    window[callbackName] = function(data) {
       resolve(data);
       delete window[callbackName];
       script.remove();
     };
 
     const query = new URLSearchParams({
-      action,
+      action: action,
       callback: callbackName,
       ...params
     });
 
-    const script = document.createElement("script");
     script.src = API_URL + "?" + query.toString();
 
-    script.onerror = function () {
+    script.onerror = function() {
       delete window[callbackName];
       script.remove();
-      reject(new Error("เชื่อมต่อ API ไม่สำเร็จ"));
+      reject(new Error("เชื่อมต่อ Google Sheets ไม่สำเร็จ"));
     };
 
     document.body.appendChild(script);
