@@ -25,37 +25,40 @@ async function setupPoseAI() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     if (results.poseLandmarks) {
-      drawPose(results.poseLandmarks, ctx, canvas);
+      drawPosePoints(results.poseLandmarks, ctx, canvas);
       detectLean(results.poseLandmarks);
     }
   });
 
   poseRunning = true;
-  poseLoop();
+  runPoseLoop();
 }
 
-async function poseLoop() {
+async function runPoseLoop() {
   if (!poseRunning || !poseDetector) return;
 
   const video = document.getElementById("camera");
   await poseDetector.send({ image: video });
 
-  requestAnimationFrame(poseLoop);
+  requestAnimationFrame(runPoseLoop);
 }
 
 function stopPoseAI() {
   poseRunning = false;
 }
 
-function drawPose(landmarks, ctx, canvas) {
-  [0, 11, 12, 23, 24].forEach(i => {
+function drawPosePoints(landmarks, ctx, canvas) {
+  const points = [0, 11, 12, 23, 24];
+
+  ctx.fillStyle = "white";
+
+  points.forEach(i => {
     const p = landmarks[i];
     if (!p) return;
 
     const x = canvas.width - p.x * canvas.width;
     const y = p.y * canvas.height;
 
-    ctx.fillStyle = "white";
     ctx.beginPath();
     ctx.arc(x, y, 9, 0, Math.PI * 2);
     ctx.fill();
@@ -63,7 +66,7 @@ function drawPose(landmarks, ctx, canvas) {
 }
 
 function detectLean(landmarks) {
-  if (!canAnswer || motionLock) return;
+  if (!window.canAnswer || motionLock) return;
 
   const leftShoulder = landmarks[11];
   const rightShoulder = landmarks[12];
@@ -75,6 +78,9 @@ function detectLean(landmarks) {
   const shoulderCenter = (leftShoulder.x + rightShoulder.x) / 2;
   const hipCenter = (leftHip.x + rightHip.x) / 2;
   const lean = shoulderCenter - hipCenter;
+
+  const leftBox = document.getElementById("leftBox");
+  const rightBox = document.getElementById("rightBox");
 
   leftBox.classList.remove("active");
   rightBox.classList.remove("active");
@@ -89,8 +95,8 @@ function detectLean(landmarks) {
 function motionChoose(side) {
   motionLock = true;
 
-  if (side === "left") leftBox.classList.add("active");
-  if (side === "right") rightBox.classList.add("active");
+  const box = document.getElementById(side === "left" ? "leftBox" : "rightBox");
+  box.classList.add("active");
 
   chooseAnswer(side);
 
