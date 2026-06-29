@@ -12,7 +12,7 @@ function apiJSONP(action, params = {}) {
     };
 
     const query = new URLSearchParams({
-      action: action,
+      action,
       callback: callbackName,
       ...params
     });
@@ -30,14 +30,14 @@ function apiJSONP(action, params = {}) {
   });
 }
 
-async function getStudentsFromAPI() {
-  return await apiJSONP("getStudents");
+function getStudentsFromAPI() {
+  return apiJSONP("getStudents");
 }
 
-async function getQuestionsFromAPI() {
-  return await apiJSONP("getQuestions");
+function getQuestionsFromAPI() {
+  return apiJSONP("getQuestions");
 }
 
-async function saveScoreToAPI(scoreData) {
-  return await apiJSONP("saveScore", scoreData);
+function saveScoreToAPI(scoreData) {
+  return apiJSONP("saveScore", scoreData);
 }
