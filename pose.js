@@ -1,1 +1,100 @@
+let poseDetector = null;
+let poseRunning = false;
+let motionLock = false;
 
+async function setupPoseAI() {
+  const video = document.getElementById("camera");
+  const canvas = document.getElementById("poseCanvas");
+  const ctx = canvas.getContext("2d");
+
+  poseDetector = new Pose({
+    locateFile: file => `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`
+  });
+
+  poseDetector.setOptions({
+    modelComplexity: 0,
+    smoothLandmarks: true,
+    enableSegmentation: false,
+    minDetectionConfidence: 0.5,
+    minTrackingConfidence: 0.5
+  });
+
+  poseDetector.onResults(results => {
+    canvas.width = canvas.clientWidth;
+    canvas.height = canvas.clientHeight;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    if (results.poseLandmarks) {
+      drawPose(results.poseLandmarks, ctx, canvas);
+      detectLean(results.poseLandmarks);
+    }
+  });
+
+  poseRunning = true;
+  poseLoop();
+}
+
+async function poseLoop() {
+  if (!poseRunning || !poseDetector) return;
+
+  const video = document.getElementById("camera");
+  await poseDetector.send({ image: video });
+
+  requestAnimationFrame(poseLoop);
+}
+
+function stopPoseAI() {
+  poseRunning = false;
+}
+
+function drawPose(landmarks, ctx, canvas) {
+  [0, 11, 12, 23, 24].forEach(i => {
+    const p = landmarks[i];
+    if (!p) return;
+
+    const x = canvas.width - p.x * canvas.width;
+    const y = p.y * canvas.height;
+
+    ctx.fillStyle = "white";
+    ctx.beginPath();
+    ctx.arc(x, y, 9, 0, Math.PI * 2);
+    ctx.fill();
+  });
+}
+
+function detectLean(landmarks) {
+  if (!canAnswer || motionLock) return;
+
+  const leftShoulder = landmarks[11];
+  const rightShoulder = landmarks[12];
+  const leftHip = landmarks[23];
+  const rightHip = landmarks[24];
+
+  if (!leftShoulder || !rightShoulder || !leftHip || !rightHip) return;
+
+  const shoulderCenter = (leftShoulder.x + rightShoulder.x) / 2;
+  const hipCenter = (leftHip.x + rightHip.x) / 2;
+  const lean = shoulderCenter - hipCenter;
+
+  leftBox.classList.remove("active");
+  rightBox.classList.remove("active");
+
+  if (lean > 0.075) {
+    motionChoose("left");
+  } else if (lean < -0.075) {
+    motionChoose("right");
+  }
+}
+
+function motionChoose(side) {
+  motionLock = true;
+
+  if (side === "left") leftBox.classList.add("active");
+  if (side === "right") rightBox.classList.add("active");
+
+  chooseAnswer(side);
+
+  setTimeout(() => {
+    motionLock = false;
+  }, 1200);
+}
