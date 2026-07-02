@@ -7,21 +7,21 @@ function apiJSONP(action, params = {}) {
 
     const script = document.createElement("script");
 
-    window[callbackName] = function(data) {
+    window[callbackName] = function (data) {
       resolve(data);
       delete window[callbackName];
       script.remove();
     };
 
     const query = new URLSearchParams({
-      action: action,
+      action,
       callback: callbackName,
       ...params
     });
 
     script.src = API_URL + "?" + query.toString();
 
-    script.onerror = function() {
+    script.onerror = function () {
       delete window[callbackName];
       script.remove();
       reject(new Error("เชื่อมต่อ Google Sheets ไม่สำเร็จ"));
