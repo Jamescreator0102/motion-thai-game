@@ -1,6 +1,6 @@
 let poseDetector = null;
 let poseRunning = false;
-let motionLock = false;
+let motionLocked = false;
 
 async function setupPoseAI() {
   const video = document.getElementById("camera");
@@ -22,6 +22,7 @@ async function setupPoseAI() {
   poseDetector.onResults(results => {
     canvas.width = canvas.clientWidth;
     canvas.height = canvas.clientHeight;
+
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     if (results.poseLandmarks) {
@@ -52,12 +53,12 @@ function drawPosePoints(landmarks, ctx, canvas) {
 
   ctx.fillStyle = "white";
 
-  points.forEach(i => {
-    const p = landmarks[i];
-    if (!p) return;
+  points.forEach(index => {
+    const point = landmarks[index];
+    if (!point) return;
 
-    const x = canvas.width - p.x * canvas.width;
-    const y = p.y * canvas.height;
+    const x = canvas.width - point.x * canvas.width;
+    const y = point.y * canvas.height;
 
     ctx.beginPath();
     ctx.arc(x, y, 9, 0, Math.PI * 2);
@@ -66,7 +67,7 @@ function drawPosePoints(landmarks, ctx, canvas) {
 }
 
 function detectLean(landmarks) {
-  if (!window.canAnswer || motionLock) return;
+  if (!gameState || !gameState.canAnswer || motionLocked) return;
 
   const leftShoulder = landmarks[11];
   const rightShoulder = landmarks[12];
@@ -79,12 +80,6 @@ function detectLean(landmarks) {
   const hipCenter = (leftHip.x + rightHip.x) / 2;
   const lean = shoulderCenter - hipCenter;
 
-  const leftBox = document.getElementById("leftBox");
-  const rightBox = document.getElementById("rightBox");
-
-  leftBox.classList.remove("active");
-  rightBox.classList.remove("active");
-
   if (lean > 0.075) {
     motionChoose("left");
   } else if (lean < -0.075) {
@@ -93,14 +88,11 @@ function detectLean(landmarks) {
 }
 
 function motionChoose(side) {
-  motionLock = true;
-
-  const box = document.getElementById(side === "left" ? "leftBox" : "rightBox");
-  box.classList.add("active");
+  motionLocked = true;
 
   chooseAnswer(side);
 
   setTimeout(() => {
-    motionLock = false;
+    motionLocked = false;
   }, 1200);
 }
