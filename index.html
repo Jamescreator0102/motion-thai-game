@@ -1,95 +1,86 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Thai Motion Quest V5</title>
-
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Thai Motion Quest</title>
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js"></script>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css" />
 </head>
-
 <body>
+  <section id="homePage" class="page active">
+    <div class="card hero-card">
+      <div class="logo">🎮</div>
+      <h1>Thai Motion Quest</h1>
+      <p>เกมภาษาไทยด้วย AI Motion</p>
+      <button id="btnGoSelect" class="main-btn">เริ่มเล่น</button>
+    </div>
+  </section>
 
-  <main id="app">
+  <section id="selectPage" class="page">
+    <div class="card">
+      <h1>เลือกผู้เล่น ป.๔</h1>
+      <input id="searchStudent" placeholder="ค้นหาชื่อนักเรียน..." />
+      <div id="studentList" class="student-list"></div>
+    </div>
+  </section>
 
-    <section id="homePage" class="page active">
-      <div class="mobile-frame">
-        <div class="logo">🎮</div>
-        <h1>Thai Motion Quest</h1>
-        <p>เกมภาษาไทยด้วย AI Motion</p>
-        <button id="btnGoSelect" class="main-btn">เริ่มเล่น</button>
+  <section id="readyPage" class="page">
+    <div class="card">
+      <div class="avatar">🧒</div>
+      <h2 id="readyName">ชื่อนักเรียน</h2>
+      <p id="readyClass">ป.๔ เลขที่ ...</p>
+      <button id="btnStartGame" class="main-btn">เริ่มเกม</button>
+      <button id="btnBackSelect" class="sub-btn">ย้อนกลับ</button>
+    </div>
+  </section>
+
+  <section id="gamePage" class="page game-page">
+    <div class="topbar">
+      <div class="pill">⭐ คะแนน <span id="score">๐</span></div>
+      <div class="pill player" id="playerName">ผู้เล่น</div>
+      <div class="pill">⏱ เวลา <span id="time">๖๐</span></div>
+    </div>
+
+    <div class="camera-box">
+      <video id="camera" autoplay playsinline muted></video>
+      <canvas id="poseCanvas"></canvas>
+      <div class="hint">ยืนกลางกล้อง แล้วเอนซ้าย/ขวา</div>
+    </div>
+
+    <div class="question-box">
+      <div class="lesson-label">📚 ด่านภาษาไทย</div>
+      <div id="questionText">กำลังโหลดโจทย์...</div>
+    </div>
+
+    <div class="answer-row">
+      <div id="leftBox" class="answer-card left-card">
+        <span class="arrow">⬅️</span>
+        <span class="word">ซ้าย</span>
       </div>
-    </section>
-
-    <section id="selectPage" class="page">
-      <div class="mobile-frame">
-        <h1>เลือกผู้เล่น ป.๔</h1>
-        <input id="searchStudent" placeholder="ค้นหาชื่อนักเรียน...">
-        <div id="studentList"></div>
+      <div id="rightBox" class="answer-card right-card">
+        <span class="word">ขวา</span>
+        <span class="arrow">➡️</span>
       </div>
-    </section>
+    </div>
 
-    <section id="readyPage" class="page">
-      <div class="mobile-frame">
-        <div class="avatar">🧒</div>
-        <h2 id="readyName"></h2>
-        <p id="readyClass"></p>
-        <button id="btnStartGame" class="main-btn">เริ่มเกม</button>
-        <button id="btnBackSelect" class="sub-btn">ย้อนกลับ</button>
-      </div>
-    </section>
+    <div id="feedback"></div>
+  </section>
 
-    <section id="gamePage" class="page game-layout">
+  <section id="summaryPage" class="page">
+    <div class="card summary-card">
+      <div class="trophy">🏆</div>
+      <h1>สรุปผล</h1>
+      <h2 id="sumName">ชื่อนักเรียน</h2>
+      <p>⭐ คะแนน: <span id="sumScore">๐</span></p>
+      <p>✅ ถูก: <span id="sumCorrect">๐</span></p>
+      <p>❌ ผิด: <span id="sumWrong">๐</span></p>
+      <p>🎯 ความแม่นยำ: <span id="sumAccuracy">๐</span>%</p>
+      <button id="btnPlayAgain" class="main-btn">เล่นอีกครั้ง</button>
+    </div>
+  </section>
 
-      <div class="game-top">
-        <div class="status-pill">⭐ <span id="score">๐</span></div>
-        <div class="status-pill player" id="playerName">ผู้เล่น</div>
-        <div class="status-pill">⏱ <span id="time">๖๐</span></div>
-      </div>
-
-      <div class="camera-panel">
-        <video id="camera" autoplay playsinline muted></video>
-        <canvas id="poseCanvas"></canvas>
-        <div class="hint">ยืนกลางกล้อง แล้วเอนซ้าย/ขวา</div>
-      </div>
-
-      <div class="question-card">
-        <div class="lesson-label">📚 ด่านภาษาไทย</div>
-        <div id="questionText">กำลังโหลดโจทย์...</div>
-      </div>
-
-      <div class="answer-grid">
-        <div id="leftBox" class="answer-card blue">
-          <span class="arrow">⬅️</span>
-          <span class="word">ซ้าย</span>
-        </div>
-
-        <div id="rightBox" class="answer-card orange">
-          <span class="word">ขวา</span>
-          <span class="arrow">➡️</span>
-        </div>
-      </div>
-
-      <div id="feedback"></div>
-
-    </section>
-
-    <section id="summaryPage" class="page">
-      <div class="mobile-frame">
-        <h1>สรุปผล</h1>
-        <h2 id="sumName"></h2>
-        <p>คะแนน: <span id="sumScore"></span></p>
-        <p>ถูก: <span id="sumCorrect"></span></p>
-        <p>ผิด: <span id="sumWrong"></span></p>
-        <p>ความแม่นยำ: <span id="sumAccuracy"></span>%</p>
-        <button id="btnPlayAgain" class="main-btn">เล่นอีกครั้ง</button>
-      </div>
-    </section>
-
-  </main>
-
-  <div id="debugBox">กำลังเตรียมระบบ...</div>
+  <div id="debugBox">พร้อมเริ่มระบบ</div>
 
   <script src="api.js"></script>
   <script src="ui.js"></script>
@@ -98,6 +89,5 @@
   <script src="game.js"></script>
   <script src="audio.js"></script>
   <script src="app.js"></script>
-
 </body>
 </html>
