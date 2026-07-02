@@ -1,7 +1,7 @@
-const thaiDigits = "๐๑๒๓๔๕๖๗๘๙";
+const THAI_DIGITS = "๐๑๒๓๔๕๖๗๘๙";
 
-function thaiNum(value) {
-  return String(value).replace(/\d/g, d => thaiDigits[d]);
+function thaiNumber(value) {
+  return String(value).replace(/\d/g, d => THAI_DIGITS[d]);
 }
 
 function debug(message) {
@@ -19,31 +19,31 @@ function showPage(pageId) {
   if (page) page.classList.add("active");
 }
 
-function renderStudents(list) {
-  const box = document.getElementById("studentList");
-  box.innerHTML = "";
+function renderStudents(studentList) {
+  const container = document.getElementById("studentList");
+  container.innerHTML = "";
 
-  if (!list || list.length === 0) {
-    box.innerHTML = `<div class="student-item">ไม่พบรายชื่อนักเรียน</div>`;
+  if (!studentList || studentList.length === 0) {
+    container.innerHTML = `<div class="student-item">ไม่พบรายชื่อนักเรียน</div>`;
     return;
   }
 
-  list.forEach(stu => {
-    const item = document.createElement("div");
-    item.className = "student-item";
-    item.textContent = `เลขที่ ${thaiNum(stu.studentNo)} ${stu.studentName}`;
+  studentList.forEach(student => {
+    const card = document.createElement("div");
+    card.className = "student-item";
+    card.textContent = `เลขที่ ${thaiNumber(student.studentNo)} ${student.studentName}`;
 
-    item.addEventListener("click", () => {
-      selectedStudent = stu;
+    card.onclick = () => {
+      selectedStudent = student;
 
-      document.getElementById("readyName").textContent = stu.studentName;
+      document.getElementById("readyName").textContent = student.studentName;
       document.getElementById("readyClass").textContent =
-        `${stu.className} เลขที่ ${thaiNum(stu.studentNo)}`;
-      document.getElementById("playerName").textContent = stu.studentName;
+        `${student.className} เลขที่ ${thaiNumber(student.studentNo)}`;
+      document.getElementById("playerName").textContent = student.studentName;
 
-      showPage("pageReady");
-    });
+      showPage("readyPage");
+    };
 
-    box.appendChild(item);
+    container.appendChild(card);
   });
 }
