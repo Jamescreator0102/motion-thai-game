@@ -1,32 +1,32 @@
-let scoreValue = 0;
-let correctValue = 0;
-let wrongValue = 0;
-let totalValue = 0;
-let timeLeftValue = 60;
-let timerId = null;
-let currentQuestion = null;
-
-window.canAnswer = false;
-
-const MAX_WRONG = 3;
+const gameState = {
+  score: 0,
+  correct: 0,
+  wrong: 0,
+  total: 0,
+  timeLeft: 60,
+  timer: null,
+  currentQuestion: null,
+  canAnswer: false,
+  maxWrong: 3
+};
 
 function startGame() {
-  scoreValue = 0;
-  correctValue = 0;
-  wrongValue = 0;
-  totalValue = 0;
-  timeLeftValue = 60;
-  currentQuestion = null;
-  window.canAnswer = true;
+  gameState.score = 0;
+  gameState.correct = 0;
+  gameState.wrong = 0;
+  gameState.total = 0;
+  gameState.timeLeft = 60;
+  gameState.currentQuestion = null;
+  gameState.canAnswer = true;
 
   updateHUD();
   nextQuestion();
 
-  timerId = setInterval(() => {
-    timeLeftValue--;
+  gameState.timer = setInterval(() => {
+    gameState.timeLeft--;
     updateHUD();
 
-    if (timeLeftValue <= 0) {
+    if (gameState.timeLeft <= 0) {
       endGame();
     }
   }, 1000);
@@ -35,8 +35,8 @@ function startGame() {
 }
 
 function updateHUD() {
-  document.getElementById("score").textContent = thaiNum(scoreValue);
-  document.getElementById("time").textContent = thaiNum(timeLeftValue);
+  document.getElementById("score").textContent = thaiNumber(gameState.score);
+  document.getElementById("time").textContent = thaiNumber(gameState.timeLeft);
 }
 
 function nextQuestion() {
@@ -45,14 +45,19 @@ function nextQuestion() {
     return;
   }
 
-  window.canAnswer = true;
+  gameState.canAnswer = true;
 
   const randomIndex = Math.floor(Math.random() * questions.length);
-  currentQuestion = questions[randomIndex];
+  gameState.currentQuestion = questions[randomIndex];
 
-  document.getElementById("questionText").textContent = currentQuestion.question;
-  document.querySelector("#leftBox .word").textContent = currentQuestion.leftWord;
-  document.querySelector("#rightBox .word").textContent = currentQuestion.rightWord;
+  document.getElementById("questionText").textContent =
+    gameState.currentQuestion.question;
+
+  document.querySelector("#leftBox .word").textContent =
+    gameState.currentQuestion.leftWord;
+
+  document.querySelector("#rightBox .word").textContent =
+    gameState.currentQuestion.rightWord;
 
   document.getElementById("leftBox").className = "answer-card left-card";
   document.getElementById("rightBox").className = "answer-card right-card";
@@ -60,27 +65,32 @@ function nextQuestion() {
 }
 
 function chooseAnswer(side) {
-  if (!window.canAnswer || !currentQuestion) return;
+  if (!gameState.canAnswer || !gameState.currentQuestion) return;
 
-  window.canAnswer = false;
-  totalValue++;
+  gameState.canAnswer = false;
+  gameState.total++;
 
-  const correctSide = String(currentQuestion.correctSide).trim().toLowerCase();
+  const correctSide = String(gameState.currentQuestion.correctSide)
+    .trim()
+    .toLowerCase();
+
   const isCorrect = side === correctSide;
   const targetBox = document.getElementById(side === "left" ? "leftBox" : "rightBox");
 
+  targetBox.classList.add("active");
+
   if (isCorrect) {
-    scoreValue += 10;
-    correctValue++;
+    gameState.score += 10;
+    gameState.correct++;
     targetBox.classList.add("correct");
     document.getElementById("feedback").textContent = "⭐ ถูกต้อง +๑๐";
     playCorrectSound();
   } else {
-    wrongValue++;
+    gameState.wrong++;
     targetBox.classList.add("wrong");
     playWrongSound();
 
-    if (wrongValue >= MAX_WRONG) {
+    if (gameState.wrong >= gameState.maxWrong) {
       document.getElementById("feedback").textContent = "💥 ผิดครบ ๓ ครั้ง จบเกม!";
       updateHUD();
 
@@ -92,54 +102,59 @@ function chooseAnswer(side) {
     }
 
     document.getElementById("feedback").textContent =
-      `❌ ผิด เหลือโอกาส ${thaiNum(MAX_WRONG - wrongValue)} ครั้ง`;
+      `❌ ผิด เหลือโอกาส ${thaiNumber(gameState.maxWrong - gameState.wrong)} ครั้ง`;
   }
 
   updateHUD();
 
   setTimeout(() => {
-    if (timeLeftValue > 0) {
+    if (gameState.timeLeft > 0) {
       nextQuestion();
     }
   }, 900);
 }
 
-function handleKeyboard(e) {
-  if (e.key === "ArrowLeft") chooseAnswer("left");
-  if (e.key === "ArrowRight") chooseAnswer("right");
+function handleKeyboard(event) {
+  if (event.key === "ArrowLeft") chooseAnswer("left");
+  if (event.key === "ArrowRight") chooseAnswer("right");
 }
 
 async function endGame() {
-  clearInterval(timerId);
-  timerId = null;
+  if (gameState.timer) {
+    clearInterval(gameState.timer);
+    gameState.timer = null;
+  }
 
   window.removeEventListener("keydown", handleKeyboard);
-  window.canAnswer = false;
+  gameState.canAnswer = false;
 
   if (typeof stopPoseAI === "function") stopPoseAI();
   if (typeof closeCamera === "function") closeCamera();
 
-  const accuracy = totalValue > 0 ? Math.round((correctValue / totalValue) * 100) : 0;
+  const accuracy =
+    gameState.total > 0
+      ? Math.round((gameState.correct / gameState.total) * 100)
+      : 0;
 
   document.getElementById("sumName").textContent = selectedStudent.studentName;
-  document.getElementById("sumScore").textContent = thaiNum(scoreValue);
-  document.getElementById("sumCorrect").textContent = thaiNum(correctValue);
-  document.getElementById("sumWrong").textContent = thaiNum(wrongValue);
-  document.getElementById("sumAccuracy").textContent = thaiNum(accuracy);
+  document.getElementById("sumScore").textContent = thaiNumber(gameState.score);
+  document.getElementById("sumCorrect").textContent = thaiNumber(gameState.correct);
+  document.getElementById("sumWrong").textContent = thaiNumber(gameState.wrong);
+  document.getElementById("sumAccuracy").textContent = thaiNumber(accuracy);
 
   try {
     await saveScoreToAPI({
       className: selectedStudent.className,
       studentName: selectedStudent.studentName,
-      score: scoreValue,
-      correct: correctValue,
-      wrong: wrongValue,
-      total: totalValue,
-      accuracy: accuracy
+      score: gameState.score,
+      correct: gameState.correct,
+      wrong: gameState.wrong,
+      total: gameState.total,
+      accuracy
     });
-  } catch (err) {
-    console.error(err);
+  } catch (error) {
+    console.error(error);
   }
 
-  showPage("pageSummary");
+  showPage("summaryPage");
 }
