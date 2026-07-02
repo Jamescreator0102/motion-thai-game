@@ -26,7 +26,7 @@ function playTone(frequency, duration) {
 
     oscillator.start(ctx.currentTime);
     oscillator.stop(ctx.currentTime + duration);
-  } catch (err) {
-    console.log("Audio not available", err);
+  } catch (error) {
+    console.log("Audio not available", error);
   }
 }
